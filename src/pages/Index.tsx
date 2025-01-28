@@ -8,7 +8,7 @@ const Index = () => {
     <div className="min-h-screen pb-16">
       <header className="border-b border-border p-4">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold">Finance Tracker</h1>
+          <h1 className="text-xl font-bold">Prospr</h1>
           <ModeToggle />
         </div>
       </header>
