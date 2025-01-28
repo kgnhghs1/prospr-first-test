@@ -37,12 +37,37 @@ const Index = () => {
 
         <SpendingChart />
 
-        <div className="bg-card p-4 rounded-lg border border-border">
-          <h2 className="text-lg font-semibold mb-4">AI Insights</h2>
-          <p className="text-muted-foreground">
-            Based on your spending patterns, you could save $127 monthly by reducing coffee shop visits.
-            Consider brewing at home 3 days a week.
-          </p>
+        <div className="bg-card p-6 rounded-lg border border-border space-y-4">
+          <h2 className="text-lg font-semibold">AI Insights</h2>
+          
+          <div className="space-y-4">
+            <div className="p-4 bg-muted rounded-lg">
+              <h3 className="font-medium text-primary mb-2">💡 Spending Pattern Detected</h3>
+              <p className="text-muted-foreground">
+                Your weekend coffee shop visits average $32/week. By brewing premium coffee at home 3 days a week, 
+                you could save $68 monthly. This could grow to $856 annually if invested in a high-yield savings 
+                account (3.5% APY).
+              </p>
+            </div>
+
+            <div className="p-4 bg-muted rounded-lg">
+              <h3 className="font-medium text-primary mb-2">📈 Investment Opportunity</h3>
+              <p className="text-muted-foreground">
+                Your entertainment spending peaks mid-month ($180 average). Consider setting up automatic 
+                investments of $100 monthly into a low-cost index fund. Based on historical market returns, 
+                this could grow to $14,000 in 10 years.
+              </p>
+            </div>
+
+            <div className="p-4 bg-muted rounded-lg">
+              <h3 className="font-medium text-primary mb-2">🔄 Weekly Habit Insight</h3>
+              <p className="text-muted-foreground">
+                You consistently order food delivery on Thursdays ($45-55 range). Meal prepping on Sundays 
+                for Thursday dinners could save $160 monthly. This pattern suggests work-related fatigue - 
+                consider adjusting your schedule or preparing easy-to-cook meals.
+              </p>
+            </div>
+          </div>
         </div>
       </main>
 
