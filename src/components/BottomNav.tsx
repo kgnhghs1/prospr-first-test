@@ -1,4 +1,4 @@
-import { Home, PieChart, Settings, CreditCard } from "lucide-react";
+import { Home, PieChart, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -20,12 +20,6 @@ const BottomNav = () => {
           label="Analytics" 
           active={location.pathname === '/analytics'}
           onClick={() => navigate('/analytics')}
-        />
-        <NavItem 
-          icon={<CreditCard size={24} />} 
-          label="Transactions" 
-          active={location.pathname === '/transactions'}
-          onClick={() => navigate('/transactions')}
         />
         <NavItem 
           icon={<Settings size={24} />} 
