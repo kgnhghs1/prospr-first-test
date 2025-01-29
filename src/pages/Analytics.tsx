@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import BottomNav from "@/components/BottomNav";
+import { cn } from "@/lib/utils";
 
 const spendingByCategory = [
   { name: "Food & Drinks", value: 890, color: "hsl(var(--primary))" },
@@ -75,8 +76,8 @@ const Analytics = () => {
                     <p className="font-medium">{item.amount}</p>
                     <p className={cn(
                       "text-sm",
-                      item.trend.startsWith("+") ? "text-[#62825D]" : 
-                      item.trend.startsWith("-") ? "text-[#ea384c]" : 
+                      item.trend.startsWith("+") ? "text-[#ea384c]" : 
+                      item.trend.startsWith("-") ? "text-[#62825D]" : 
                       "text-muted-foreground"
                     )}>
                       {item.trend}
