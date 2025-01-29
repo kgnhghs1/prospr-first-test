@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import BottomNav from "@/components/BottomNav";
 import { cn } from "@/lib/utils";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 
 const spendingByCategory = [
   { name: "Food & Drinks", value: 890, color: "hsl(var(--primary))" },
@@ -10,6 +11,34 @@ const spendingByCategory = [
   { name: "Transportation", value: 280, color: "#6366f1" },
   { name: "Bills", value: 320, color: "#ec4899" }
 ];
+
+const transactions = {
+  "Food & Drinks": [
+    { date: "2024-01-28", merchant: "Starbucks", amount: 8.50 },
+    { date: "2024-01-27", merchant: "Whole Foods", amount: 65.20 },
+    { date: "2024-01-25", merchant: "Restaurant XYZ", amount: 42.80 },
+  ],
+  "Shopping": [
+    { date: "2024-01-28", merchant: "Amazon", amount: 124.99 },
+    { date: "2024-01-26", merchant: "Target", amount: 89.50 },
+    { date: "2024-01-24", merchant: "Best Buy", amount: 299.99 },
+  ],
+  "Entertainment": [
+    { date: "2024-01-27", merchant: "Netflix", amount: 15.99 },
+    { date: "2024-01-25", merchant: "Cinema", amount: 32.00 },
+    { date: "2024-01-23", merchant: "Spotify", amount: 9.99 },
+  ],
+  "Transportation": [
+    { date: "2024-01-28", merchant: "Uber", amount: 24.50 },
+    { date: "2024-01-26", merchant: "Gas Station", amount: 45.80 },
+    { date: "2024-01-24", merchant: "Public Transit", amount: 25.00 },
+  ],
+  "Bills": [
+    { date: "2024-01-28", merchant: "Electric Company", amount: 145.00 },
+    { date: "2024-01-25", merchant: "Internet Service", amount: 79.99 },
+    { date: "2024-01-23", merchant: "Phone Bill", amount: 95.00 },
+  ]
+};
 
 const monthlyTrends = [
   { category: "Food & Drinks", trend: "+12%", amount: "$890", previousMonth: "$795" },
@@ -88,6 +117,40 @@ const Analytics = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* New Transactions Section */}
+        {spendingByCategory.map((category) => (
+          <Card key={category.name}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span style={{ color: category.color }}>{category.name}</span>
+                <span className="text-sm font-normal text-muted-foreground">
+                  Recent Transactions
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Merchant</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {transactions[category.name as keyof typeof transactions].map((transaction, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell>{new Date(transaction.date).toLocaleDateString()}</TableCell>
+                      <TableCell>{transaction.merchant}</TableCell>
+                      <TableCell className="text-right">${transaction.amount.toFixed(2)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        ))}
       </main>
 
       <BottomNav />
