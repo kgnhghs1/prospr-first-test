@@ -2,6 +2,7 @@ import { ModeToggle } from "@/components/ui/mode-toggle";
 import SpendingChart from "@/components/SpendingChart";
 import ExpenseCard from "@/components/ExpenseCard";
 import BottomNav from "@/components/BottomNav";
+import { Progress } from "@/components/ui/progress";
 
 const Index = () => {
   return (
@@ -41,6 +42,22 @@ const Index = () => {
           <h2 className="text-lg font-semibold">AI Insights</h2>
           
           <div className="space-y-4">
+            <div className="p-4 bg-muted rounded-lg">
+              <h3 className="font-medium text-primary mb-2">🎯 Goal Progress: New Car Fund</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Current savings: $3,450</span>
+                  <span>Goal: $25,000</span>
+                </div>
+                <Progress value={13.8} className="h-2" />
+                <p className="text-muted-foreground text-sm mt-2">
+                  By redirecting your weekend entertainment spending ($180/month) and daily coffee purchases ($95/month) 
+                  to your car fund, you could reach your goal 8 months sooner. This would add $275 monthly to your 
+                  savings, accelerating your progress by 13%.
+                </p>
+              </div>
+            </div>
+
             <div className="p-4 bg-muted rounded-lg">
               <h3 className="font-medium text-primary mb-2">💡 Spending Pattern Detected</h3>
               <p className="text-muted-foreground">
