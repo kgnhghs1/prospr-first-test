@@ -18,41 +18,57 @@ const Index = () => {
     );
   };
 
-  const generateGrowthData = (monthlyAmount: number, months: number, apy: number = 0.035) => {
-    return Array.from({ length: months }, (_, i) => {
-      const totalSavings = monthlyAmount * (i + 1);
+  const generateHistoricalAndGrowthData = (
+    monthlySpending: number,
+    monthlySavings: number,
+    months: number,
+    apy: number = 0.035
+  ) => {
+    // Generate 3 months of historical data
+    const historicalData = Array.from({ length: 3 }, (_, i) => ({
+      month: -(2 - i),
+      amount: monthlySpending,
+      type: 'Historical Spending'
+    }));
+
+    // Generate future growth data
+    const futureData = Array.from({ length: months }, (_, i) => {
+      const totalSavings = monthlySavings * (i + 1);
       const interest = totalSavings * (Math.pow(1 + apy, (i + 1) / 12) - 1);
       return {
         month: i + 1,
         amount: Math.round(totalSavings + interest),
+        type: 'Projected Savings'
       };
     });
+
+    return [...historicalData, ...futureData];
   };
 
   const insights = [
     {
       title: "🎯 Goal Progress: New Car Fund",
-      content: "Current savings: $3,450 | Goal: $25,000",
-      description: "By redirecting your weekend entertainment spending ($180/month) and daily coffee purchases ($95/month) to your car fund, you could reach your goal 8 months sooner. This would add $275 monthly to your savings, accelerating your progress by 13%.",
-      data: generateGrowthData(275, 24)
+      content: "Current spending: $275/month on entertainment & coffee",
+      description: "By redirecting your weekend entertainment spending ($180/month) and daily coffee purchases ($95/month) to your car fund, you could reach your goal 8 months sooner.",
+      data: generateHistoricalAndGrowthData(275, 275, 24)
     },
     {
-      title: "💡 Spending Pattern Detected",
-      content: "Coffee Shop Savings Potential",
+      title: "💡 Coffee Shop Savings Potential",
+      content: "Current spending: $32/week on coffee shops",
       description: "Your weekend coffee shop visits average $32/week. By brewing premium coffee at home 3 days a week, you could save $68 monthly. This could grow to $856 annually if invested in a high-yield savings account (3.5% APY).",
-      data: generateGrowthData(68, 12)
+      data: generateHistoricalAndGrowthData(128, 68, 12)
     },
     {
-      title: "📈 Investment Opportunity",
-      content: "Entertainment Budget Optimization",
+      title: "📈 Entertainment Budget Optimization",
+      content: "Current spending: $180/month on entertainment",
       description: "Your entertainment spending peaks mid-month ($180 average). Consider setting up automatic investments of $100 monthly into a low-cost index fund. Based on historical market returns, this could grow to $14,000 in 10 years.",
-      data: generateGrowthData(100, 36, 0.07)
+      data: generateHistoricalAndGrowthData(180, 100, 36, 0.07)
     },
     {
-      title: "🔄 Weekly Habit Insight",
-      content: "Food Delivery Analysis",
+      title: "🔄 Food Delivery Analysis",
+      content: "Current spending: $45-55 per Thursday on delivery",
       description: "You consistently order food delivery on Thursdays ($45-55 range). Meal prepping on Sundays for Thursday dinners could save $160 monthly. This pattern suggests work-related fatigue - consider adjusting your schedule or preparing easy-to-cook meals.",
-      data: generateGrowthData(160, 12)
+      data: generateHistoricalAndGrowthData(200, 160, 12)
     }
   ];
 
@@ -122,7 +138,11 @@ const Index = () => {
                         <XAxis 
                           dataKey="month" 
                           stroke="#888888"
-                          tickFormatter={(value) => `M${value}`}
+                          tickFormatter={(value) => {
+                            if (value < 0) return `${Math.abs(value)}m ago`;
+                            if (value === 0) return 'Now';
+                            return `M${value}`;
+                          }}
                         />
                         <YAxis
                           stroke="#888888"
@@ -131,11 +151,18 @@ const Index = () => {
                         <Tooltip
                           content={({ active, payload }) => {
                             if (active && payload && payload.length) {
+                              const data = payload[0].payload;
                               return (
                                 <div className="bg-background border border-border p-2 rounded-lg shadow-lg">
-                                  <p className="font-medium">Month {payload[0].payload.month}</p>
+                                  <p className="font-medium">
+                                    {data.month < 0 
+                                      ? `${Math.abs(data.month)} months ago`
+                                      : data.month === 0 
+                                      ? 'Now'
+                                      : `Month ${data.month}`}
+                                  </p>
                                   <p className="text-sm">
-                                    Total: ${payload[0].value}
+                                    {data.type}: ${payload[0].value}
                                   </p>
                                 </div>
                               );
