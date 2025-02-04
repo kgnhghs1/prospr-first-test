@@ -3,7 +3,7 @@ import SpendingChart from "@/components/SpendingChart";
 import ExpenseCard from "@/components/ExpenseCard";
 import BottomNav from "@/components/BottomNav";
 import { Progress } from "@/components/ui/progress";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 
@@ -27,7 +27,8 @@ const Index = () => {
     // Generate 3 months of historical data
     const historicalData = Array.from({ length: 3 }, (_, i) => ({
       month: -(2 - i),
-      amount: monthlySpending,
+      currentSpending: monthlySpending,
+      projectedSavings: null,
       type: 'Historical Spending'
     }));
 
@@ -37,7 +38,8 @@ const Index = () => {
       const interest = totalSavings * (Math.pow(1 + apy, (i + 1) / 12) - 1);
       return {
         month: i + 1,
-        amount: Math.round(totalSavings + interest),
+        currentSpending: monthlySpending,
+        projectedSavings: Math.round(totalSavings + interest),
         type: 'Projected Savings'
       };
     });
@@ -161,19 +163,36 @@ const Index = () => {
                                       ? 'Now'
                                       : `Month ${data.month}`}
                                   </p>
-                                  <p className="text-sm">
-                                    {data.type}: ${payload[0].value}
-                                  </p>
+                                  {data.currentSpending && (
+                                    <p className="text-sm text-red-500">
+                                      Current Spending: ${data.currentSpending}
+                                    </p>
+                                  )}
+                                  {data.projectedSavings !== null && (
+                                    <p className="text-sm text-green-500">
+                                      Projected Savings: ${data.projectedSavings}
+                                    </p>
+                                  )}
                                 </div>
                               );
                             }
                             return null;
                           }}
                         />
+                        <Legend />
                         <Line 
                           type="monotone" 
-                          dataKey="amount" 
-                          stroke="hsl(var(--primary))" 
+                          dataKey="currentSpending"
+                          name="Current Spending"
+                          stroke="hsl(var(--destructive))"
+                          strokeWidth={2}
+                          dot={false}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="projectedSavings"
+                          name="Projected Savings"
+                          stroke="hsl(var(--primary))"
                           strokeWidth={2}
                           dot={false}
                         />
