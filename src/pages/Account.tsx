@@ -4,6 +4,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import BottomNav from "@/components/BottomNav";
 
 const Account = () => {
   const navigate = useNavigate();
@@ -68,6 +69,7 @@ const Account = () => {
           </div>
         ))}
       </main>
+      <BottomNav />
     </div>
   );
 };
