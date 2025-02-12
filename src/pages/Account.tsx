@@ -5,9 +5,12 @@ import {
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import BottomNav from "@/components/BottomNav";
+import PlaidConnect from "@/components/PlaidConnect";
+import { useState } from "react";
 
 const Account = () => {
   const navigate = useNavigate();
+  const [transactions, setTransactions] = useState([]);
 
   const sections = [
     {
@@ -68,6 +71,21 @@ const Account = () => {
             </div>
           </div>
         ))}
+        <div className="mt-6 flex flex-col items-center">
+          <PlaidConnect />
+          {transactions.length > 0 && (
+            <div>
+              <h2 className="text-lg font-semibold mt-4">Recent Transactions</h2>
+              <ul>
+                {transactions.map((txn, index) => (
+                  <li key={index} className="border-b p-2">
+                    <strong>{txn.merchant_name || "Unknown Merchant"}</strong> - ${txn.amount}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
       </main>
       <BottomNav />
     </div>

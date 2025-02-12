@@ -2,7 +2,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } fro
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useState } from "react";
-
+/*
 const weeklyData = [
   { name: "Mon", food: 24, shopping: 15, entertainment: 10 },
   { name: "Tue", food: 13, shopping: 25, entertainment: 5 },
