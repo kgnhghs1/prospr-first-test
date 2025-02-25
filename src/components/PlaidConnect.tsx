@@ -1,36 +1,56 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { usePlaidLink } from "react-plaid-link";
+import { fetchLinkToken, exchangePublicToken, fetchAccounts } from "../lib/plaidService";
 
-const PlaidConnect: React.FC<{ onOpen: (openFn: () => void) => void }> = ({ onOpen }) => {
+const PlaidConnect = () => {
   const [linkToken, setLinkToken] = useState<string | null>(null);
+  const [accounts, setAccounts] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/create_link_token", { method: "POST" })
-      .then((res) => res.json())
-      .then((data) => setLinkToken(data.link_token))
-      .catch((error) => console.error("Error fetching link token:", error));
+    const getLinkToken = async () => {
+      const token = await fetchLinkToken();
+      setLinkToken(token);
+    };
+    getLinkToken();
   }, []);
+
+  const onSuccess = async (publicToken: string) => {
+    console.log("Public Token:", publicToken);
+    const response = await exchangePublicToken(publicToken);
+    console.log("Access Token Response:", response);
+
+    // Fetch user accounts after linking
+    const accountData = await fetchAccounts();
+    setAccounts(accountData);
+  };
 
   const { open, ready } = usePlaidLink({
     token: linkToken!,
-    onSuccess: (public_token) => console.log("Public Token:", public_token),
+    onSuccess,
   });
 
-  useEffect(() => {
-    if (ready && onOpen) onOpen(() => open());
-  }, [ready]); // ✅ Only updates when ready changes
-
   return (
-    <button
-      onClick={() => open()}
-      disabled={!ready}
-      className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors border-b border-border"
-    >
-      <div className="flex items-center gap-3">
-        <span className="text-primary">🔗</span>
-        <span>Connect Your Bank Account</span>
-      </div>
-    </button>
+    <div className="text-center">
+      <button onClick={() => open()} disabled={!ready} className="bg-blue-500 text-white p-2 rounded mb-4">
+        Connect Bank Account
+      </button>
+
+      {/* Display account info if available */}
+      {accounts.length > 0 && (
+        <div className="bg-gray-100 p-4 rounded-md shadow-md">
+          <h2 className="text-lg font-semibold mb-2">Linked Accounts</h2>
+          <ul>
+            {accounts.map((acc) => (
+              <li key={acc.account_id} className="border-b py-2">
+                <strong>{acc.name}</strong> - {acc.subtype} ({acc.type})  
+                <br />
+                Balance: ${acc.balances.current}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 };
 

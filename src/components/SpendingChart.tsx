@@ -1,41 +1,67 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const weeklyData = [
-  { name: "Mon", food: 24, shopping: 15, entertainment: 10 },
-  { name: "Tue", food: 13, shopping: 25, entertainment: 5 },
-  { name: "Wed", food: 38, shopping: 10, entertainment: 15 },
-  { name: "Thu", food: 42, shopping: 30, entertainment: 20 },
-  { name: "Fri", food: 67, shopping: 45, entertainment: 35 },
-  { name: "Sat", food: 89, shopping: 55, entertainment: 40 },
-  { name: "Sun", food: 45, shopping: 35, entertainment: 25 },
-];
+interface SpendingChartProps {
+  transactions: any[];
+}
 
-const monthlyData = [
-  { name: "Week 1", food: 180, shopping: 150, entertainment: 90 },
-  { name: "Week 2", food: 220, shopping: 180, entertainment: 120 },
-  { name: "Week 3", food: 190, shopping: 160, entertainment: 100 },
-  { name: "Week 4", food: 250, shopping: 200, entertainment: 150 },
-];
+const SpendingChart: React.FC<SpendingChartProps> = ({ transactions }) => {
+  const [view, setView] = useState<"weekly" | "monthly">("weekly");
+  const [chartData, setChartData] = useState<any[]>([]);
 
-const categories = [
-  { key: "food", color: "hsl(var(--primary))", name: "Food & Drinks" },
-  { key: "shopping", color: "#22c55e", name: "Shopping" },
-  { key: "entertainment", color: "#f59e0b", name: "Entertainment" },
-];
+  useEffect(() => {
+    if (!transactions || transactions.length === 0) return;
 
-const SpendingChart = () => {
-  const [view, setView] = useState("weekly");
-  const data = view === "weekly" ? weeklyData : monthlyData;
+    const aggregateData = (type: "weekly" | "monthly") => {
+      const groupedData: { [key: string]: { [category: string]: number } } = {};
+      const now = new Date();
+      const pastWeekStart = new Date(now);
+      pastWeekStart.setDate(now.getDate() - 6);
+
+      transactions.forEach((transaction) => {
+        const date = new Date(transaction.date);
+        if (type === "weekly" && date < pastWeekStart) return;
+
+        const key = type === "weekly" 
+          ? date.toLocaleDateString('en-US', { weekday: 'short' }) 
+          : `Month ${date.getMonth() + 1}`;
+
+        const category = transaction.category?.[0] || "Other";
+        if (!groupedData[key]) {
+          groupedData[key] = {};
+        }
+        if (!groupedData[key][category]) {
+          groupedData[key][category] = 0;
+        }
+        groupedData[key][category] += transaction.amount;
+      });
+
+      // Ensure weekdays are in correct order
+      if (type === "weekly") {
+        const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        return weekdays
+          .map((day) => ({ name: day, ...groupedData[day] }))
+          .filter((data) => Object.keys(data).length > 1); // Remove empty days
+      }
+
+      return Object.keys(groupedData).map((key) => ({ name: key, ...groupedData[key] }));
+    };
+
+    setChartData(aggregateData(view));
+  }, [transactions, view]);
 
   return (
     <Card className="w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold">Spending Overview</CardTitle>
-          <ToggleGroup type="single" value={view} onValueChange={(value) => value && setView(value)}>
+          <ToggleGroup type="single" value={view} onValueChange={(value) => {
+            if (value === "weekly" || value === "monthly") {
+              setView(value);
+            }
+          }}>
             <ToggleGroupItem value="weekly" aria-label="Weekly view">
               Weekly
             </ToggleGroupItem>
@@ -48,7 +74,7 @@ const SpendingChart = () => {
       <CardContent>
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data}>
+            <BarChart data={chartData}>
               <XAxis 
                 dataKey="name" 
                 stroke="#888888"
@@ -71,7 +97,7 @@ const SpendingChart = () => {
                         <p className="font-medium mb-1">{payload[0].payload.name}</p>
                         {payload.map((entry, index) => (
                           <p key={index} className="text-sm">
-                            {categories.find(cat => cat.key === entry.dataKey)?.name}: ${entry.value}
+                            {entry.name}: ${typeof entry.value === 'number' ? entry.value.toFixed(2) : entry.value}
                           </p>
                         ))}
                       </div>
@@ -80,19 +106,9 @@ const SpendingChart = () => {
                   return null;
                 }}
               />
-              <Legend 
-                formatter={(value) => {
-                  const category = categories.find(cat => cat.key === value);
-                  return category ? category.name : value;
-                }}
-              />
-              {categories.map((category) => (
-                <Bar
-                  key={category.key}
-                  dataKey={category.key}
-                  fill={category.color}
-                  radius={[4, 4, 0, 0]}
-                />
+              <Legend />
+              {Object.keys(chartData[0] || {}).filter((key) => key !== "name").map((category, index) => (
+                <Bar key={index} dataKey={category} fill={`hsl(${(index * 80) % 360}, 70%, 50%)`} radius={[4, 4, 0, 0]} />
               ))}
             </BarChart>
           </ResponsiveContainer>

@@ -1,14 +1,80 @@
+import { useState, useEffect } from "react";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import SpendingChart from "@/components/SpendingChart";
 import ExpenseCard from "@/components/ExpenseCard";
 import BottomNav from "@/components/BottomNav";
-import { Progress } from "@/components/ui/progress";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { fetchTransactions } from "@/lib/plaidService";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
 
 const Index = () => {
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [spendingSummary, setSpendingSummary] = useState({
+    totalSpending: 0,
+    totalSavings: 0,
+    recurringExpenses: 0,
+  });
   const [expandedInsights, setExpandedInsights] = useState<number[]>([]);
+  
+  useEffect(() => {
+    const token = localStorage.getItem("plaid_access_token");
+    if (!token) {
+      console.error("❌ No access token in localStorage, skipping request");
+      return;
+    }
+
+    fetchTransactions()
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setTransactions(data);
+          calculateSpendingSummary(data);
+        } else {
+          console.error("❌ Unexpected API response:", data);
+        }
+      })
+      .catch((error) => console.error("❌ Error fetching transactions:", error));
+  }, []);
+
+  const calculateSpendingSummary = (transactions: any[]) => {
+    let totalSpending = 0;
+    let recurringExpenses = 0;
+    const recurringKeywords = ["Subscription", "Rent", "Utility", "Membership"];
+
+    transactions.forEach((transaction) => {
+      totalSpending += transaction.amount;
+      if (recurringKeywords.some((keyword) => transaction.name.includes(keyword))) {
+        recurringExpenses += transaction.amount;
+      }
+    });
+
+    setSpendingSummary({
+      totalSpending: Math.round(totalSpending),
+      totalSavings: Math.round(totalSpending * 0.35),
+      recurringExpenses: Math.round(recurringExpenses),
+    });
+  };
+
+  const insights = [
+    {
+      title: "🎯 Goal Progress: New Car Fund",
+      content: "Current spending: $275/month on entertainment & coffee",
+      description: "By redirecting your weekend entertainment spending ($180/month) and daily coffee purchases ($95/month) to your car fund, you could reach your goal 8 months sooner.",
+    },
+    {
+      title: "💡 Coffee Shop Savings Potential",
+      content: "Current spending: $32/week on coffee shops",
+      description: "Your weekend coffee shop visits average $32/week. By brewing premium coffee at home 3 days a week, you could save $68 monthly. This could grow to $856 annually if invested in a high-yield savings account (3.5% APY).",
+    },
+    {
+      title: "📈 Entertainment Budget Optimization",
+      content: "Current spending: $180/month on entertainment",
+      description: "Your entertainment spending peaks mid-month ($180 average). Consider setting up automatic investments of $100 monthly into a low-cost index fund. Based on historical market returns, this could grow to $14,000 in 10 years.",
+    },
+    {
+      title: "🔄 Food Delivery Analysis",
+      content: "Current spending: $45-55 per Thursday on delivery",
+      description: "You consistently order food delivery on Thursdays ($45-55 range). Meal prepping on Sundays for Thursday dinners could save $160 monthly. This pattern suggests work-related fatigue - consider adjusting your schedule or preparing easy-to-cook meals.",
+    }
+  ];
 
   const toggleInsight = (index: number) => {
     setExpandedInsights(prev => 
@@ -17,62 +83,6 @@ const Index = () => {
         : [...prev, index]
     );
   };
-
-  const generateHistoricalAndGrowthData = (
-    monthlySpending: number,
-    monthlySavings: number,
-    months: number,
-    apy: number = 0.035
-  ) => {
-    // Generate 3 months of historical data
-    const historicalData = Array.from({ length: 3 }, (_, i) => ({
-      month: -(2 - i),
-      currentSpending: monthlySpending,
-      projectedSavings: null,
-      type: 'Historical Spending'
-    }));
-
-    // Generate future growth data
-    const futureData = Array.from({ length: months }, (_, i) => {
-      const totalSavings = monthlySavings * (i + 1);
-      const interest = totalSavings * (Math.pow(1 + apy, (i + 1) / 12) - 1);
-      return {
-        month: i + 1,
-        currentSpending: monthlySpending,
-        projectedSavings: Math.round(totalSavings + interest),
-        type: 'Projected Savings'
-      };
-    });
-
-    return [...historicalData, ...futureData];
-  };
-
-  const insights = [
-    {
-      title: "🎯 Goal Progress: New Car Fund",
-      content: "Current spending: $275/month on entertainment & coffee",
-      description: "By redirecting your weekend entertainment spending ($180/month) and daily coffee purchases ($95/month) to your car fund, you could reach your goal 8 months sooner.",
-      data: generateHistoricalAndGrowthData(275, 275, 24)
-    },
-    {
-      title: "💡 Coffee Shop Savings Potential",
-      content: "Current spending: $32/week on coffee shops",
-      description: "Your weekend coffee shop visits average $32/week. By brewing premium coffee at home 3 days a week, you could save $68 monthly. This could grow to $856 annually if invested in a high-yield savings account (3.5% APY).",
-      data: generateHistoricalAndGrowthData(128, 68, 12)
-    },
-    {
-      title: "📈 Entertainment Budget Optimization",
-      content: "Current spending: $180/month on entertainment",
-      description: "Your entertainment spending peaks mid-month ($180 average). Consider setting up automatic investments of $100 monthly into a low-cost index fund. Based on historical market returns, this could grow to $14,000 in 10 years.",
-      data: generateHistoricalAndGrowthData(180, 100, 36, 0.07)
-    },
-    {
-      title: "🔄 Food Delivery Analysis",
-      content: "Current spending: $45-55 per Thursday on delivery",
-      description: "You consistently order food delivery on Thursdays ($45-55 range). Meal prepping on Sundays for Thursday dinners could save $160 monthly. This pattern suggests work-related fatigue - consider adjusting your schedule or preparing easy-to-cook meals.",
-      data: generateHistoricalAndGrowthData(200, 160, 12)
-    }
-  ];
 
   return (
     <div className="min-h-screen pb-16">
@@ -85,31 +95,15 @@ const Index = () => {
 
       <main className="max-w-4xl mx-auto p-4 space-y-6">
         <div className="grid gap-4 md:grid-cols-3">
-          <ExpenseCard
-            title="Monthly Spending"
-            amount={2580}
-            trend={12}
-            positive={false}
-          />
-          <ExpenseCard
-            title="Monthly Savings"
-            amount={890}
-            trend={8}
-            positive={true}
-          />
-          <ExpenseCard
-            title="Recurring Expenses"
-            amount={420}
-            trend={-5}
-            positive={true}
-          />
+          <ExpenseCard title="Monthly Spending" amount={spendingSummary.totalSpending} trend={12} positive={false} />
+          <ExpenseCard title="Monthly Savings" amount={spendingSummary.totalSavings} trend={8} positive={true} />
+          <ExpenseCard title="Recurring Expenses" amount={spendingSummary.recurringExpenses} trend={-5} positive={true} />
         </div>
 
-        <SpendingChart />
+        <SpendingChart transactions={transactions} />
 
         <div className="bg-card p-6 rounded-lg border border-border space-y-4">
           <h2 className="text-lg font-semibold">AI Insights</h2>
-          
           <div className="space-y-4">
             {insights.map((insight, index) => (
               <div key={index} className="p-4 bg-muted rounded-lg">
@@ -132,80 +126,11 @@ const Index = () => {
                     <ChevronDown className="h-5 w-5 text-muted-foreground" />
                   )}
                 </div>
-
-                {expandedInsights.includes(index) && (
-                  <div className="mt-4 h-[200px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={insight.data}>
-                        <XAxis 
-                          dataKey="month" 
-                          stroke="#888888"
-                          tickFormatter={(value) => {
-                            if (value < 0) return `${Math.abs(value)}m ago`;
-                            if (value === 0) return 'Now';
-                            return `M${value}`;
-                          }}
-                        />
-                        <YAxis
-                          stroke="#888888"
-                          tickFormatter={(value) => `$${value}`}
-                        />
-                        <Tooltip
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              const data = payload[0].payload;
-                              return (
-                                <div className="bg-background border border-border p-2 rounded-lg shadow-lg">
-                                  <p className="font-medium">
-                                    {data.month < 0 
-                                      ? `${Math.abs(data.month)} months ago`
-                                      : data.month === 0 
-                                      ? 'Now'
-                                      : `Month ${data.month}`}
-                                  </p>
-                                  {data.currentSpending && (
-                                    <p className="text-sm text-red-500">
-                                      Current Spending: ${data.currentSpending}
-                                    </p>
-                                  )}
-                                  {data.projectedSavings !== null && (
-                                    <p className="text-sm text-green-500">
-                                      Projected Savings: ${data.projectedSavings}
-                                    </p>
-                                  )}
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                        <Legend />
-                        <Line 
-                          type="monotone" 
-                          dataKey="currentSpending"
-                          name="Current Spending"
-                          stroke="hsl(var(--destructive))"
-                          strokeWidth={2}
-                          dot={false}
-                        />
-                        <Line 
-                          type="monotone" 
-                          dataKey="projectedSavings"
-                          name="Projected Savings"
-                          stroke="hsl(var(--primary))"
-                          strokeWidth={2}
-                          dot={false}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
               </div>
             ))}
           </div>
         </div>
       </main>
-
       <BottomNav />
     </div>
   );
