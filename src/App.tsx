@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Analytics from "./pages/Analytics";
 import Account from "./pages/Account";
 import NotFound from "./pages/NotFound";
+import PlaidConnect from "./components/PlaidConnect";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,11 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+
+        <div className="flex items-center justify-center mt-6">
+          <PlaidConnect />
+        </div>
+
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
