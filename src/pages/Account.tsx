@@ -20,7 +20,7 @@ const Account: React.FC = () => {
 
   // Fetch Plaid Link Token on Mount
   useEffect(() => {
-    fetch("http://localhost:8000/create_link_token", { method: "POST" })
+    fetch("https://prospr-first-test.onrender.com/create_link_token", { method: "POST" })
       .then((res) => res.json())
       .then((data) => setLinkToken(data.link_token))
       .catch((error) => console.error("Error fetching link token:", error));
@@ -47,7 +47,7 @@ const Account: React.FC = () => {
 
       // Exchange public token for access token
       try {
-        const response = await fetch("http://localhost:8000/exchange_public_token", {
+        const response = await fetch("https://prospr-first-test.onrender.com/exchange_public_token", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ public_token }),

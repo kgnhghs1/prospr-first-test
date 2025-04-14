@@ -1,5 +1,5 @@
 export const fetchLinkToken = async () => {
-    const response = await fetch("http://localhost:8000/create_link_token", {
+    const response = await fetch("https://prospr-first-test.onrender.com/create_link_token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
     });
@@ -8,7 +8,7 @@ export const fetchLinkToken = async () => {
   };
   
   export const exchangePublicToken = async (publicToken: string) => {
-    const response = await fetch("http://localhost:8000/exchange_public_token", {
+    const response = await fetch("https://prospr-first-test.onrender.com/exchange_public_token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ public_token: publicToken }),
@@ -17,7 +17,7 @@ export const fetchLinkToken = async () => {
   };
 
   export const fetchAccounts = async () => {
-    const response = await fetch("http://localhost:8000/accounts", {
+    const response = await fetch("https://prospr-first-test.onrender.com/accounts", {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });
@@ -33,7 +33,7 @@ export const fetchLinkToken = async () => {
   
     console.log("🟡 Sending request with token:", accessToken); // Debugging log
   
-    const response = await fetch("http://localhost:8000/transactions", {
+    const response = await fetch("https://prospr-first-test.onrender.com/transactions", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
